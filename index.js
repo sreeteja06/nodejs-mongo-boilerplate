@@ -38,7 +38,6 @@ app.get(
 );
 
 const exportDb = async () => {
-  module.exports = { db, app, port };
   app.use('/fileUpload', FileUpload);
   app.listen(port, () => {
     console.log(`Started up at port http://localhost:${port}/`);
@@ -47,6 +46,8 @@ const exportDb = async () => {
 
 const connectDb = async () => {
   db = await MongoConnection.connectDB;
+  app.locals.db = db;
+  // in endpoints you can access the db by const { db } = req.app.locals;
   exportDb();
 };
 
