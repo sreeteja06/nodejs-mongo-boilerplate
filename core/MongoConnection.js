@@ -7,11 +7,12 @@ const connectDB = new Promise((resolve, reject) => {
     MongoClient.connect(process.env.DB_URI, (err, db) => {
       if (err) {
         console.log(err);
-        process.exit(1);
+        reject(err);
+      } else {
+        _db = db;
+        console.log('connected successfully to mongodb');
+        resolve(db.db('apimachine'));
       }
-      _db = db;
-      console.log('connected successfully to mongodb');
-      resolve(db.db('apimachine'));
     });
   } catch (e) {
     console.log(e);

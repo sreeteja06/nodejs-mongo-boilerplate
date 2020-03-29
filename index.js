@@ -16,8 +16,12 @@ app.use(helmet());
 app.disable('x-powered-by');
 app.use(morgan('combined', { stream: winston.stream }));
 
+app.use('/fileUpload', FileUpload);
+
+app.use(express.static(`${__dirname}/public`));
+
 const port = process.env.PORT || 4000;
-let db;
+
 const awaitHandler = fn => {
   return async (req, res, next) => {
     try {
@@ -31,24 +35,25 @@ const awaitHandler = fn => {
 };
 
 app.get(
-  '/',
+  '/test',
   awaitHandler(async (req, res) => {
-    res.send({ res: 'dsfd' });
+    res.send({ res: 'test' });
   })
 );
 
-const exportDb = async () => {
-  app.use('/fileUpload', FileUpload);
-  app.listen(port, () => {
-    console.log(`Started up at port http://localhost:${port}/`);
+app.get('/', (req, res) => {
+  res.render('index.html');
+});
+
+MongoConnection.connectDB
+  .then(db => {
+    app.locals.db = db;
+    app.listen(port, () => {
+      console.log(`Started up at port http://localhost:${port}/`);
+    });
+  })
+  .catch(() => {
+    app.listen(port, () => {
+      console.log(`Started up at port http://localhost:${port}/`);
+    });
   });
-};
-
-const connectDb = async () => {
-  db = await MongoConnection.connectDB;
-  app.locals.db = db;
-  // in endpoints you can access the db by const { db } = req.app.locals;
-  exportDb();
-};
-
-connectDb();
